@@ -10,6 +10,7 @@ stops = pd.read_csv('brno/stops.txt')
 stop_times = pd.read_csv('brno/stop_times.txt')
 trips = pd.read_csv('brno/trips.txt')
 calendar = pd.read_csv('brno/calendar.txt')
+routes = pd.read_csv('brno/routes.txt')
 
 def haversine(lat1, lon1, lat2, lon2):
     """Calculate the great-circle distance between two points on the Earth."""
@@ -51,17 +52,27 @@ def get_departures(stop_id, current_time, current_date):
     ]['service_id'].tolist()
 
     # Find trips with active services
-    active_trips = trips[trips['service_id'].isin(active_services)]['trip_id'].tolist()
+    active_trips = trips[trips['service_id'].isin(active_services)]
+
+    # Merge trips with routes to get `route_short_name`
+    trips_with_routes = active_trips.merge(routes, on='route_id', how='left')
 
     # Filter departures for active trips
     stop_departures = stop_times[
         (stop_times['stop_id'] == stop_id) &
-        (stop_times['trip_id'].isin(active_trips))
+        (stop_times['trip_id'].isin(trips_with_routes['trip_id']))
     ].copy()
 
     # Parse and normalize departure times
     stop_departures['departure_time'] = stop_departures['departure_time'].apply(parse_gtfs_time)
     upcoming_departures = stop_departures[stop_departures['departure_time'] > current_time]
+
+    # Merge with trips_with_routes to include `route_short_name`
+    upcoming_departures = upcoming_departures.merge(
+        trips_with_routes[['trip_id', 'route_short_name']],
+        on='trip_id',
+        how='left'
+    )
 
     # Sort departures by time
     upcoming_departures = upcoming_departures.sort_values('departure_time')
@@ -70,7 +81,8 @@ def get_departures(stop_id, current_time, current_date):
     upcoming_departures['departure_time'] = upcoming_departures['departure_time'].apply(lambda t: t.strftime("%H:%M:%S"))
 
     # Return the results as a dictionary
-    return upcoming_departures[['departure_time', 'trip_id']].to_dict(orient='records')
+    return upcoming_departures[['departure_time', 'trip_id', 'route_short_name']].to_dict(orient='records')
+
 
 
 
