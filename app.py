@@ -54,8 +54,12 @@ def get_departures(stop_id, current_time, current_date):
     # Find trips with active services
     active_trips = trips[trips['service_id'].isin(active_services)]
 
-    # Merge trips with routes to get `route_short_name`
-    trips_with_routes = active_trips.merge(routes, on='route_id', how='left')
+    # Merge trips with routes to get `route_short_name` and include `trip_headsign`
+    trips_with_routes = active_trips.merge(
+        routes[['route_id', 'route_short_name']],
+        on='route_id',
+        how='left'
+    )
 
     # Filter departures for active trips
     stop_departures = stop_times[
@@ -67,9 +71,9 @@ def get_departures(stop_id, current_time, current_date):
     stop_departures['departure_time'] = stop_departures['departure_time'].apply(parse_gtfs_time)
     upcoming_departures = stop_departures[stop_departures['departure_time'] > current_time]
 
-    # Merge with trips_with_routes to include `route_short_name`
+    # Merge with trips_with_routes to include `route_short_name` and `trip_headsign`
     upcoming_departures = upcoming_departures.merge(
-        trips_with_routes[['trip_id', 'route_short_name']],
+        trips_with_routes[['trip_id', 'route_short_name', 'trip_headsign']],
         on='trip_id',
         how='left'
     )
@@ -81,7 +85,9 @@ def get_departures(stop_id, current_time, current_date):
     upcoming_departures['departure_time'] = upcoming_departures['departure_time'].apply(lambda t: t.strftime("%H:%M:%S"))
 
     # Return the results as a dictionary
-    return upcoming_departures[['departure_time', 'trip_id', 'route_short_name']].to_dict(orient='records')
+    return upcoming_departures[['departure_time', 'trip_id', 'route_short_name', 'trip_headsign']].to_dict(orient='records')
+
+
 
 
 
