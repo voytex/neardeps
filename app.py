@@ -1,6 +1,7 @@
 import pandas as pd
 import math
 from flask import Flask, request, jsonify
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -10,7 +11,7 @@ stop_times = pd.read_csv('brno/stop_times.txt')
 trips = pd.read_csv('brno/trips.txt')
 calendar = pd.read_csv('brno/calendar.txt')
 
-def haversine(lat1: float, lon1: float, lat2: float, lon2:float):
+def haversine(lat1, lon1, lat2, lon2):
     """Calculate the great-circle distance between two points on the Earth."""
     R = 6371  # Earth radius in kilometers
     dlat = math.radians(lat2 - lat1)
@@ -25,38 +26,73 @@ def find_nearest_stop(lat, lon):
     nearest_stop = stops.loc[stops['distance'].idxmin()]
     return nearest_stop['stop_id'], nearest_stop['stop_name']
 
-def get_departures(stop_id, current_time, day_of_week):
+def parse_gtfs_time(time_str):
+    """Parse a GTFS time string (HH:MM:SS) that may exceed 24 hours."""
+    hours, minutes, seconds = map(int, time_str.split(":"))
+    if hours >= 24:
+        # Normalize hours by subtracting 24 and keep track of overflow
+        hours = hours - 24
+    return datetime.strptime(f"{hours:02}:{minutes:02}:{seconds:02}", "%H:%M:%S").time()
+
+def get_departures(stop_id, current_time, current_date):
     """Get departures from the stop with active services."""
-    # Filter active services
+    # Parse the current time and day
+    current_time = datetime.strptime(current_time, "%H:%M:%S").time()
+    day_of_week = current_date.strftime("%A").lower()  # Get day name (e.g., 'monday')
+
+    # Convert current_date to an integer in YYYYMMDD format
+    current_date_int = int(current_date.strftime("%Y%m%d"))
+
+    # Filter active services based on the calendar
     active_services = calendar[
-        (calendar['start_date'] <= day_of_week) &
-        (calendar['end_date'] >= day_of_week) 
-        #(calendar[day_of_week] == 1)
+        (calendar['start_date'] <= current_date_int) &
+        (calendar['end_date'] >= current_date_int) &
+        (calendar[day_of_week] == 1)
     ]['service_id'].tolist()
 
     # Find trips with active services
     active_trips = trips[trips['service_id'].isin(active_services)]['trip_id'].tolist()
 
     # Filter departures for active trips
-    departures = stop_times[
+    stop_departures = stop_times[
         (stop_times['stop_id'] == stop_id) &
-        (stop_times['trip_id'].isin(active_trips)) &
-        (stop_times['departure_time'] > current_time)
-    ].sort_values('departure_time')
+        (stop_times['trip_id'].isin(active_trips))
+    ].copy()
 
-    return departures[['departure_time', 'trip_id']].to_dict(orient='records')
+    # Parse and normalize departure times
+    stop_departures['departure_time'] = stop_departures['departure_time'].apply(parse_gtfs_time)
+    upcoming_departures = stop_departures[stop_departures['departure_time'] > current_time]
+
+    # Sort departures by time
+    upcoming_departures = upcoming_departures.sort_values('departure_time')
+
+    # Convert departure_time to strings for JSON serialization
+    upcoming_departures['departure_time'] = upcoming_departures['departure_time'].apply(lambda t: t.strftime("%H:%M:%S"))
+
+    # Return the results as a dictionary
+    return upcoming_departures[['departure_time', 'trip_id']].to_dict(orient='records')
+
+
+
 
 @app.route('/departures', methods=['GET'])
 def departures():
     """API endpoint to get departures from the nearest stop."""
     try:
+        # Get query parameters
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
-        current_time = request.args.get('current_time', '12:00:00')  # Default time for testing
-        day_of_week = request.args.get('day_of_week', 'monday')  # Default day for testing
+        current_time = request.args.get('current_time', datetime.now().strftime("%H:%M:%S"))
+        current_date = request.args.get('current_date', datetime.now().strftime("%Y-%m-%d"))
+        
+        # Convert current_date to datetime object
+        current_date = datetime.strptime(current_date, "%Y-%m-%d").date()
 
+        # Find nearest stop
         stop_id, stop_name = find_nearest_stop(lat, lon)
-        departures = get_departures(stop_id, current_time, day_of_week)
+
+        # Get departures
+        departures = get_departures(stop_id, current_time, current_date)
 
         return jsonify({
             "nearest_stop": stop_name,
