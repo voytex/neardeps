@@ -5,6 +5,7 @@ import pandas as pd
 import math
 from flask import Flask, request, jsonify
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from colorama import Style, Fore
 
 @dataclass
@@ -19,6 +20,7 @@ PORT = int(os.environ["ND_PORT"])
 
 
 app = Flask(__name__)
+
 class CityData(NamedTuple):
     """Class for better organization of cities' GTFS data"""
     stops: pd.DataFrame
@@ -138,7 +140,7 @@ def departures():
         city = str(request.args.get('city'))
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
-        current_time = request.args.get('time', datetime.now().strftime("%H:%M:%S"))
+        current_time = request.args.get('time', datetime.now(ZoneInfo("Europe/Prague")).strftime("%H:%M:%S"))
         current_date = request.args.get('date', datetime.now().strftime("%Y-%m-%d"))
         # Find nearest stop
         stop_id, stop_name = find_nearest_stop(city, lat, lon)
