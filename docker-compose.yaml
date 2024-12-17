@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    ports:
+      - 51234:51234
+    restart: always
+    volumes:
+      - "./cities:/app/cities"
+

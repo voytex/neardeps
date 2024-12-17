@@ -4,10 +4,8 @@ FROM python:3.10-slim
 # Set the working directory
 WORKDIR /app
 
-# Copy requirements and app files
-COPY requirements.txt ./
-COPY app.py ./
-COPY cities/ ./cities/
+COPY requirements.txt requirements.txt
+COPY app.py app.py
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
