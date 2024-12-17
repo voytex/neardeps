@@ -1,5 +1,5 @@
 bin
-brno
 include
 lib
 pyvenv.cfg
+cities/brno/*.txt

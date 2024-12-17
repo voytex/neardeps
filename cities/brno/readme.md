@@ -1,0 +1,1 @@
+Since City of Brno updates its GTFS data every week, update script was implemented and is being executed every week using `cron`.
