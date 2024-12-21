@@ -1,9 +1,10 @@
 # neardeps
 _an iOS shortcut for displaying nearest public transport departures_
+
 ## General
 This repository contains source code and auxiliary files for deploying Docker container - **back-end** and download link for iCloud shortcut - **front-end**. 
 > [!TIP]
-> If the user does not want to deploy their own Docker container, they can use author's one, that runs this exact Python script. It can be found on following link:
+> If the user does not want to deploy their own Docker container, they can use author's one. It can be found on following link:
 > 
 > [`http://gtfs.vojtechlukas.cz/departures`](http://gtfs.vojtechlukas.cz/departures)
 > 
@@ -29,8 +30,8 @@ At this stage of the project, API endpoint `/departures` implemented in [app.py]
 | `city` | str | yes | City whose GTFS data shall be examined. So far, just `brno` is implemented |
 | `lat`  | float  | yes | Latitude GPS coordinate of current user position |
 | `lon`  | float  | yes | Longitude GPS coordinate of current user position |
-| `time` | str(`HH:MM:SS`) | no | Time for querying public transport departures |
-| `date` | str(`YYYY-MM-DD`) | no | Date for querying public transport departures | 
+| `time` | str(`HH:MM:SS`) | no | Time for querying public transport departures. Omitted = current time |
+| `date` | str(`YYYY-MM-DD`) | no | Date for querying public transport departures. Omitted = current date | 
 
 ### Example Usage
 ```
@@ -41,24 +42,41 @@ domain.com/departures?city=brno&lat=49.123&lon=16.456
 domain.com/departures?city=brno&lat=49.123&lon=16.456&date=2024-12-31&time=12:35:00
 ```
 - returns JSON with departures on Dec 31 2024 at nearest (based on `lat` and `lon` fields) public transport stop
+
 ### Returns
-Endpoint returns JSON with following structure and example values:
+Following request
+```
+http://domain.com/departures?
+  lat=49.21630&
+  lon=16.57843&
+  city=brno&
+  time=1:00:00&
+  date=2024-12-15
+```
+returns JSON with following structure and values:
 ```json
 {
   "departures": [
     {
-      "departure_time": "16:05:00",
-      "route_short_name": "36",
-      "trip_headsign": "Komín, sídliště",
-      "trip_id": 54186
+      "departure_time": "01:12:00",
+      "route_short_name": "N89",
+      "trip_headsign": "U Luhu",
+      "trip_id": 56550
     },
     {
-      "departure_time": "16:20:00",
-      "route_short_name": "36",
-      "trip_headsign": "Komín, sídliště",
-      "trip_id": 54108
+      "departure_time": "02:12:00",
+      "route_short_name": "N89",
+      "trip_headsign": "U Luhu",
+      "trip_id": 56557
     },
-    // altogether returns 10 earliest public transport departures
+    {
+      "departure_time": "03:12:00",
+      "route_short_name": "N89",
+      "trip_headsign": "U Luhu",
+      "trip_id": 56563
+    },
+    // ...
+    }
   ],
   "nearest_stop": "Makovského náměstí"
 }
