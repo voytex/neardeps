@@ -1,5 +1,5 @@
 # neardeps
-_an iOS shortcut for displaying nearest public transport departures_
+_an iOS shortcut for displaying nearest public transport stop's departures_
 
 ## General
 This repository contains source code and auxiliary files for deploying Docker container - **back-end** and download link for iCloud shortcut - **front-end**. 
@@ -24,7 +24,7 @@ This repository contains source code and auxiliary files for deploying Docker co
 
 ## API endpoint
 ### Arguments
-At this stage of the project, API endpoint `/departures` implemented in [app.py](./app.py) can be queried with following arguments:
+At this stage of the project, API endpoint `[GET] /departures` implemented in [app.py](./app.py) can be queried with following arguments:
 | Argument | Type | Mandatory? | Description
 | --- | --- | --- | --- | 
 | `city` | str | yes | City whose GTFS data shall be examined. So far, just `brno` is implemented |
@@ -76,12 +76,18 @@ returns JSON with following structure and values:
       "trip_id": 56563
     },
     // ...
-    }
   ],
   "nearest_stop": "Makovského náměstí"
 }
 ```
 
-## Motivation
+## Future updates
+- Other Czech cities
+  - Back-end implementation is ready for additional cities, problem relies in obtaining [GTFS data](https://developers.google.com/transit/gtfs). In Czechia, only City of Brno provides pure GTFS data to public. Other cities' GTFS data are a bit harder to obtain, as CHAPS insists on using obsolete technology (see [this thread](https://www.infoprovsechny.cz/request/pristup_ke_skutecne_strojove_zpr)). 
+  - Solution however might be to indeed use `ftp://ftp.cisjr.cz` and convert JDF data to GTFS using [jdf2gtfs](https://www.infoprovsechny.cz/request/pristup_ke_skutecne_strojove_zpr) script by [@masopust](https://github.com/masopust)
+- Android shortcut?
+  - As author does not posses any Android device, he will not be developing any Android front-end client soon. However, it should be very simple (as iOS shortcut is). If any Android user implements this in shareable form, please let the author know via GitHub issues.
+- Other features
+  - If you have any suggestion, please add a feature request via GitHub issues.
 
 
