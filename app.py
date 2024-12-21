@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 import os
-from typing import List, NamedTuple
+from typing import NamedTuple
 import pandas as pd
 import math
 from flask import Flask, request, jsonify
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from colorama import Style, Fore
+
 
 @dataclass
 class CLR:
@@ -21,6 +22,7 @@ PORT = int(os.environ["ND_PORT"])
 
 app = Flask(__name__)
 
+
 class CityData(NamedTuple):
     """Class for better organization of cities' GTFS data"""
     stops: pd.DataFrame
@@ -28,6 +30,7 @@ class CityData(NamedTuple):
     trips: pd.DataFrame
     calendar: pd.DataFrame
     routes: pd.DataFrame
+
 
 def initialize_gtfs() -> dict[str, CityData]:
     """Looks through workspace and tries to find all cities
@@ -85,7 +88,7 @@ def get_departures(city: str, stop_id: str, current_time: str, current_date: str
     ccd = cities_data[city]
     current_time_obj = datetime.strptime(current_time, "%H:%M:%S").time()
     current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
-     # Get day name (e.g., 'monday')
+    # Get day name (e.g., 'monday')
     day_of_week = current_date_obj.strftime("%A").lower() 
     # Convert current_date to an integer in YYYYMMDD format
     current_date_int = int(current_date_obj.strftime("%Y%m%d"))
