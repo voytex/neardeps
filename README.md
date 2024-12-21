@@ -33,15 +33,14 @@ At this stage of the project, API endpoint `/departures` implemented in [app.py]
 | `date` | str(`YYYY-MM-DD`) | no | Date for querying public transport departures | 
 
 ### Example Usage
-- ```
-  domain.com/departures?city=brno&lat=49.123&lon=16.456
-  ```
-  - returns JSON with earliest departures from nearest (based on `lat` and `lon` fields) public transport stop
-- ```
-  domain.com/departures?city=brno&lat=49.123&lon=16.456&date=2024-12-31&time=12:35:00
-  ```
-  - returns JSON with departures on Dec 31 2024 at nearest (based on `lat` and `lon` fields) public transport stop
-
+```
+domain.com/departures?city=brno&lat=49.123&lon=16.456
+```
+- returns JSON with earliest departures from nearest (based on `lat` and `lon` fields) public transport stop
+```
+domain.com/departures?city=brno&lat=49.123&lon=16.456&date=2024-12-31&time=12:35:00
+```
+- returns JSON with departures on Dec 31 2024 at nearest (based on `lat` and `lon` fields) public transport stop
 ### Returns
 Endpoint returns JSON with following structure and example values:
 ```json
