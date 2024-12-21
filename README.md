@@ -5,12 +5,13 @@ This repository contains source code and auxiliary files for deploying Docker co
 > [!TIP]
 > If the user does not want to deploy their own Docker container, they can use author's one, that runs this exact Python script. It can be found on following link:
 > 
-> [`http://gtfs.vojtechlukas.cz`](http://gtfs.vojtechlukas.cz)
+> [`http://gtfs.vojtechlukas.cz/departures`](http://gtfs.vojtechlukas.cz/departures)
+> 
+> This endpoint is set as default in the iOS shortcut. 
 
 > [!WARNING]
-> This endpoint is provided AS IS with no warranty. Data it returns are based on public source ([data.brno](https://data.brno.cz/datasets/379d2e9a7907460c8ca7fda1f3e84328/about)).
+> Author's endpoint is provided AS IS with no warranty. Data it returns are based on public source ([data.brno](https://data.brno.cz/datasets/379d2e9a7907460c8ca7fda1f3e84328/about)).
 
-This endpoint is set as default in the iOS shortcut. 
 
 ## iOS shortcut
 ### Usage
